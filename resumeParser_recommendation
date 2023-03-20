@@ -1,0 +1,178 @@
+
+pip install nltk
+
+pip install docx2txt
+
+import nltk
+nltk.download('punkt')
+
+import docx2txt
+ 
+ #extracting text from .docx document
+def extract_text_from_docx(docx_path):
+    txt = docx2txt.process(docx_path)
+    if txt:
+      text = txt.replace('\t', ' ')
+      return text
+    return None
+ 
+ 
+if __name__ == '__main__':
+    text = extract_text_from_docx('updated resume.docx')
+    print(text)
+
+import docx2txt
+import nltk
+ 
+nltk.download('stopwords')
+ 
+# you may read the database from a csv file or some other database
+skill_list = [
+    'machine learning',
+    'cooking',
+    'painting',
+    'deep learning',
+    'python',
+    'film making',
+    'cinematography',
+    'dash',
+    'java'
+]
+ 
+ 
+def extract_text_from_docx(docx_path):
+    txt = docx2txt.process(docx_path)
+    if txt:
+      text = txt.replace('\t', ' ')
+      return text
+    return None
+ 
+ 
+def extract_skills_from_resume(input_text):
+    stop_words = set(nltk.corpus.stopwords.words('english'))
+    word_tokens = nltk.tokenize.word_tokenize(input_text)
+ 
+    stop_filtered = [w for w in word_tokens if w not in stop_words]
+
+    filtered_tokens = [w for w in stop_filtered if w.isalpha()]
+
+    bigrams_trigrams = list(map(' '.join, nltk.everygrams(filtered_tokens, 2, 3)))
+
+    skills = set()
+
+    #single words
+    for token in filtered_tokens:
+        if token.lower() in skill_list:
+            skills.add(token)
+    
+    #hyphenated words
+    for ngram in bigrams_trigrams:
+        if ngram.lower() in skill_list:
+            skills.add(ngram)
+ 
+    return skills
+ 
+ 
+if __name__ == '__main__':
+    text = extract_text_from_docx('updated resume.docx')
+    skills = extract_skills_from_resume(text)
+ 
+    print(skills)
+
+import pandas as pd
+data = pd.read_csv('Coursera.csv')
+data.head()
+
+l = []
+for i in data['Skills']:
+  l.append(i.split(" ")[:5])
+for i in l[:25]:
+  print(i, end='\n')
+
+import pandas as pd
+df = pd.read_csv('webautomation_coursera.csv')
+df.head()
+
+df['category-subject-area'][:10]
+
+df1 = df[['category-subject-area','description']].copy()
+df1 = df1[pd.notnull(df1['description'])]
+df1.head()
+#df1['category-subject-area'].isna().sum().sum()
+
+df1['category_id'] = df1['category-subject-area'].factorize()[0]
+
+df1.head(10)
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+tfidf = TfidfVectorizer(sublinear_tf = True, min_df=1, ngram_range=(1, 2), stop_words='english')
+features = tfidf.fit_transform(df1['description']).toarray()
+labels = df1['category_id']
+
+from sklearn.model_selection import train_test_split
+X = df1['description']
+y = df1['category-subject-area']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
+from sklearn.naive_bayes import MultinomialNB
+models = [RandomForestClassifier(n_estimators=100, max_depth=8, random_state=0), LinearSVC(), MultinomialNB(), LogisticRegression(random_state=0),]
+
+from sklearn.model_selection import cross_val_score
+entries = []
+cv = pd.DataFrame(index=range(2*len(models)))
+for model in models:
+  model_name = model.__class__.__name__
+  accuracies = cross_val_score(model, features, labels, scoring='accuracy', cv=2)
+  for idx, accuracy in enumerate(accuracies):
+    entries.append((model_name, idx, accuracy))
+cv = pd.DataFrame(entries, columns = ['model_name', 'fold_idx', 'accuracy'])
+
+cv
+
+X_train, X_test, y_train, y_test, indices_train, indices_test = train_test_split(features, labels, df1.index, test_size=0.3, random_state=1)
+model = LinearSVC()
+model.fit(X_train, y_train)
+y_pred = model.predict(X_test)
+
+print(len(df1['category-subject-area'].unique()))
+
+from sklearn import metrics
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+conf_mat = confusion_matrix(y_test, y_pred)
+fig, ax = plt.subplots(figsize=(8,8))
+sns.heatmap(conf_mat, annot=True, cmap="Blues", fmt='d',
+            xticklabels=df1['category-subject-area'].values.unique(), 
+            yticklabels=df1['category-subject-area'].values.unique())
+plt.ylabel('Actual')
+plt.xlabel('Predicted')
+plt.title("CONFUSION MATRIX - LinearSVCn", size=32);
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, 
+                                                    test_size=0.25,
+                                                    random_state = 0)
+tfidf = TfidfVectorizer(sublinear_tf=True, min_df=5,
+                        ngram_range=(1, 2), 
+                        stop_words='english')
+fitted_vectorizer = tfidf.fit(X_train)
+tfidf_vectorizer_vectors = fitted_vectorizer.transform(X_train)
+model = LinearSVC().fit(tfidf_vectorizer_vectors, y_train)
+
+course = "In this course, you will develop more Advanced web application programming skills. You will learn how to control data read and write access using methods, publish and subscribe. You will learn how to access your database and server shells using command line tools. You will use the SimpleSchema system to validate data and generate input forms automatically. You will see a complete collaborative code editing environment, TextCircle, being built from scratch.   At the end of this course, you will be able to: - use Meteor methods to control data write access - use publish and subscribe to control data read access - install and use Advanced Meteor packages - add user accounts to your applications - implement complex MongoDB filters - use the MongoDB and meteor server shells - define data validations schemas using SimpleSchema - generate data input forms automatically using SimpleSchema  In this course, you will complete: 2 programming assignments taking ~4 hours each to complete 4 quizzes, each taking ~20 minutes to complete multiple practice quizzes, each taking ~5 minutes to complete  Participation in or completion of this online course will not confer academic credit for University of London programmes"
+print(model.predict(fitted_vectorizer.transform([course])))
+
+df1['category-subject-area'].unique()
+
+course1 = "This course will introduce the learner to information visualization basics, with a focus on reporting and charting using the matplotlib library. The course will start with a design and information literacy perspective, touching on what makes a good and bad visualization, and what statistical measures translate into in terms of visualizations. The second week will focus on the technology used to make visualizations in python, matplotlib, and introduce users to best practices when creating basic charts and how to realize design decisions in the framework. The third week will be a tutorial of functionality available in matplotlib, and demonstrate a variety of basic statistical charts helping learners to identify when a particular method is good for a particular problem. The course will end with a discussion of other forms of structuring and visualizing data.   This course should be taken after Introduction to Data Science in Python and before the remainder of the Applied Data Science with Python courses: Applied Machine Learning in Python, Applied Text Mining in Python, and Applied Social Network Analysis in Python."
+print(model.predict(fitted_vectorizer.transform([course1])))
+
+course2 = "Contributed to existing projects by debugging code and indulging in QA and implementing new widgets to improve the functionality of the application."
+print(model.predict(fitted_vectorizer.transform([course2])))
+
+print(df[df['category-subject-area'] == 'Data Analysis']['title'].unique())
+
+df.shape
